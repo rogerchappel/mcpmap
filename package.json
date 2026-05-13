@@ -1,0 +1,52 @@
+{
+  "name": "mcpmap",
+  "version": "0.1.0",
+  "description": "Inventory local Model Context Protocol configs without leaking secrets.",
+  "type": "module",
+  "bin": {
+    "mcpmap": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test dist/**/*.test.js",
+    "pretest": "npm run build",
+    "smoke": "npm run build && node dist/cli.js --help && node dist/cli.js scan --config tests/fixtures/claude-desktop.json --format table && node dist/cli.js doctor --config tests/fixtures/problematic.jsonc",
+    "package:smoke": "npm pack --dry-run",
+    "release:check": "npm test && npm run check && npm run build && npm run smoke && npm run package:smoke"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "security",
+    "cli",
+    "inventory",
+    "jsonc"
+  ],
+  "author": "Roger Chappel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/mcpmap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/mcpmap/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/mcpmap#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
