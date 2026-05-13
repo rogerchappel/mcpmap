@@ -1,0 +1,26 @@
+{
+  "project": "mcpmap",
+  "factoryRun": "2026-05-14-am",
+  "prd": "docs/PRD.md",
+  "lanes": [
+    "scaffold",
+    "core",
+    "cli",
+    "safety",
+    "evidence",
+    "release-prep"
+  ],
+  "requiredGates": [
+    "npm test",
+    "npm run check",
+    "npm run build",
+    "npm run smoke",
+    "bash scripts/validate.sh",
+    "fixture CLI smoke"
+  ],
+  "defaultSafety": {
+    "staticOnly": true,
+    "startupProbeRequires": "--allow-run",
+    "defaultTimeoutMs": 1500
+  }
+}
