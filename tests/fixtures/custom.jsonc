@@ -1,0 +1,12 @@
+// Custom MCP-ish shape with comments and trailing commas.
+{
+  "servers": {
+    "notes": {
+      "command": "node",
+      "args": ["server.js",],
+      "env": {
+        "NOTES_DIR": "~/notes",
+      },
+    },
+  },
+}
