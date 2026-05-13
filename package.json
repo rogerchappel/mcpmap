@@ -4,11 +4,11 @@
   "description": "Inventory local Model Context Protocol configs without leaking secrets.",
   "type": "module",
   "bin": {
-    "mcpmap": "./dist/src/cli.js"
+    "mcpmap": "./dist/cli.js"
   },
-  "main": "./dist/src/index.js",
+  "main": "./dist/index.js",
   "exports": {
-    ".": "./dist/src/index.js"
+    ".": "./dist/index.js"
   },
   "files": [
     "dist",
@@ -18,11 +18,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test dist/**/*.test.js",
+    "test": "npm run build:test && node --test dist-test/tests/**/*.test.js",
     "pretest": "npm run build",
-    "smoke": "npm run build && node dist/src/cli.js --help && node dist/src/cli.js scan --no-defaults --config tests/fixtures/claude-desktop.json --format table && sh -c 'node dist/src/cli.js doctor --no-defaults --config tests/fixtures/problematic.jsonc || test $? = 1'",
+    "smoke": "npm run build && node dist/cli.js --help && node dist/cli.js scan --no-defaults --config tests/fixtures/claude-desktop.json --format table && sh -c 'node dist/cli.js doctor --no-defaults --config tests/fixtures/problematic.jsonc || test $? = 1'",
     "package:smoke": "npm pack --dry-run",
-    "release:check": "npm test && npm run check && npm run build && npm run smoke && npm run package:smoke"
+    "release:check": "npm test && npm run check && npm run build && npm run smoke && npm run package:smoke",
+    "build:test": "tsc -p tsconfig.test.json"
   },
   "keywords": [
     "mcp",
