@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": ["/opt/mcp/filesystem.js", "/tmp"],
+      "env": {
+        "FILESYSTEM_ROOT": "/tmp",
+        "API_TOKEN": "sk-testsecret1234567890"
+      },
+      "tools": ["read_file", "write_file"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_123456789012345678901234567890123456"
+      }
+    }
+  }
+}
