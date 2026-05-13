@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "broken": {
+      "args": ["--flag"],
+      "env": { "PASSWORD": "plain-text" }
+    },
+    "relative": {
+      "command": "definitely-not-a-real-mcp-command",
+      "cwd": "relative/path"
+    }
+  }
+}
