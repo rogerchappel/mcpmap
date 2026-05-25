@@ -73,6 +73,8 @@ mcpmap scan -c "$HOME/Library/Application Support/Claude/claude_desktop_config.j
 mcpmap doctor --no-defaults -c ./examples/mcp.json --format json
 ```
 
+The repository includes `examples/mcp.json` with fake values only, so you can inspect redaction and duplicate/risk output without exposing a workstation config.
+
 ## Development
 
 ```bash
