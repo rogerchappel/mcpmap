@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "docs-search": {
+      "command": "node",
+      "args": ["./server.js"],
+      "cwd": "/opt/example-mcp/docs-search",
+      "env": {
+        "DOCS_ROOT": "/workspace/docs",
+        "SEARCH_API_KEY": "example-not-a-real-token"
+      }
+    },
+    "local-fixtures": {
+      "command": "python3",
+      "args": ["-m", "fixtures.server"],
+      "env": {
+        "FIXTURE_MODE": "readonly"
+      }
+    }
+  }
+}
