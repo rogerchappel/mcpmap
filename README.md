@@ -57,6 +57,7 @@ Redaction covers sensitive env key names (`TOKEN`, `PASSWORD`, `SECRET`, `API_KE
 - commands not found on `PATH` or as files;
 - relative `cwd` values;
 - duplicate server names across scanned configs;
+- disabled server entries;
 - risky env keys or token-looking env values;
 - unknown config shapes.
 

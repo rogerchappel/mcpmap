@@ -20,6 +20,9 @@ export function doctorRecords(records: ServerRecord[]): DoctorIssue[] {
 
 export function doctorRecord(record: ServerRecord): DoctorIssue[] {
   const issues: DoctorIssue[] = [];
+  if (record.disabled) {
+    issues.push({ code: 'DISABLED_SERVER', severity: 'info', message: 'Server is marked disabled in config.', server: record.name, sourcePath: record.sourcePath });
+  }
   if (!record.command) {
     issues.push({ code: 'MISSING_COMMAND', severity: 'error', message: 'Server has no command.', server: record.name, sourcePath: record.sourcePath });
   } else if (!commandExists(record.command)) {
