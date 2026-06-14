@@ -25,3 +25,11 @@ test('scans custom JSONC server maps', async () => {
   assert.equal(result.servers[0]?.name, 'notes');
   assert.deepEqual(result.servers[0]?.args, ['server.js']);
 });
+
+test('reports disabled servers as informational doctor issues', async () => {
+  const result = await scan(options([path.join('tests', 'fixtures', 'custom.jsonc')]));
+
+  assert.equal(result.servers[1]?.name, 'archived');
+  assert.equal(result.servers[1]?.disabled, true);
+  assert.ok(result.issues.some((issue) => issue.code === 'DISABLED_SERVER' && issue.severity === 'info'));
+});

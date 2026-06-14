@@ -8,5 +8,10 @@
         "NOTES_DIR": "~/notes",
       },
     },
+    "archived": {
+      "command": "node",
+      "args": ["old-server.js"],
+      "disabled": true,
+    },
   },
 }
