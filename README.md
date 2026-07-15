@@ -90,15 +90,23 @@ bash scripts/validate.sh
 ## Package contents
 
 The npm package allowlist includes the runtime files plus the public support
-documents needed for release review: `README.md`, `LICENSE`, `SECURITY.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`.
+documents needed for release review: `README.md`, `LICENSE`, `SECURITY.md`,
+`CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and
+`docs/RELEASE_CHECKLIST.md`.
 Run `npm run package:smoke` or `npm pack --dry-run` before publishing to
 confirm those files are still present in the tarball.
+
+`npm run package:smoke` builds the package, verifies the compiled CLI bin is
+present, parses `npm pack --dry-run --json`, and fails if required runtime or
+support files are missing from the npm tarball.
 
 ## Contributing
 
 Bug reports and small, practical improvements are welcome. Please include fixture configs with secrets replaced by obviously fake values. Do not paste real tokens into issues, tests, or screenshots.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [docs/PRD.md](docs/PRD.md).
+Use [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) before tagging or
+publishing a release candidate.
 
 ## License
 
@@ -109,3 +117,5 @@ MIT © Roger Chappel
 Run the release-readiness checks that match this package before publishing or opening a release PR.
 
 - `npm run release:check` - run the full release gate
+- `npm run release:readiness` - verify metadata, package allowlist coverage,
+  support docs, CI presence, and package-smoke wiring
