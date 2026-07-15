@@ -26,7 +26,7 @@
     "test": "npm run build:test && node --test dist-test/tests/**/*.test.js",
     "pretest": "npm run build",
     "smoke": "npm run build && node dist/cli.js --help && node dist/cli.js scan --no-defaults --config tests/fixtures/claude-desktop.json --format table && sh -c 'node dist/cli.js doctor --no-defaults --config tests/fixtures/problematic.jsonc || test $? = 1'",
-    "package:smoke": "npm run build && npm pack --dry-run",
+    "package:smoke": "npm run build && node scripts/package-smoke.mjs",
     "release:check": "npm test && npm run check && npm run build && npm run smoke && npm run package:smoke",
     "build:test": "tsc -p tsconfig.test.json",
     "prepack": "npm run build"
