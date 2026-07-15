@@ -18,6 +18,7 @@ const requiredFiles = [
   'dist/cli.js',
   'dist/index.js',
   'examples/mcp.json',
+  'docs/RELEASE_CHECKLIST.md',
   'README.md',
   'LICENSE',
   'SECURITY.md',
