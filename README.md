@@ -103,6 +103,8 @@ support files are missing from the npm tarball.
 Bug reports and small, practical improvements are welcome. Please include fixture configs with secrets replaced by obviously fake values. Do not paste real tokens into issues, tests, or screenshots.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [docs/PRD.md](docs/PRD.md).
+Use [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) before tagging or
+publishing a release candidate.
 
 ## License
 
