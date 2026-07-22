@@ -24,6 +24,31 @@ export function redactObject(input: Record<string, unknown>): Record<string, str
   return Object.fromEntries(Object.entries(input).map(([key, value]) => [key, redactValue(key, value)]));
 }
 
+export function redactArguments(input: unknown[]): string[] {
+  let redactNext = false;
+  return input.map((value) => {
+    const argument = String(value);
+    if (redactNext) {
+      redactNext = false;
+      return '<redacted>';
+    }
+
+    const separator = argument.indexOf('=');
+    if (separator > 0) {
+      const key = argument.slice(0, separator).replace(/^-+/, '');
+      const argumentValue = argument.slice(separator + 1);
+      if (looksSensitiveKey(key) || looksSensitiveValue(argumentValue)) {
+        return `${argument.slice(0, separator + 1)}<redacted>`;
+      }
+    } else if (argument.startsWith('-') && looksSensitiveKey(argument.replace(/^-+/, ''))) {
+      redactNext = true;
+    }
+
+    if (looksSensitiveValue(argument)) return '<redacted>';
+    return redactInline(argument);
+  });
+}
+
 export function redactInline(text: string): string {
   return text
     .replace(/(token|secret|password|api[_-]?key)(["'\s:=]+)([^"'\s,}]+)/gi, '$1$2<redacted>')
