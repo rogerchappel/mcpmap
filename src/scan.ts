@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { buildSources } from './paths.js';
 import { parseJsonc } from './jsonc.js';
 import { extractServerConfigs, pathExists } from './discover.js';
-import { redactObject } from './redact.js';
+import { redactArguments, redactObject } from './redact.js';
 import { doctorRecords } from './doctor.js';
 import { probeServer } from './probe.js';
 import type { CliOptions, DoctorIssue, RawServerConfig, ScanResult, ServerRecord } from './types.js';
@@ -12,7 +12,7 @@ function asString(value: unknown): string | undefined {
 }
 
 function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.map(String) : [];
+  return Array.isArray(value) ? redactArguments(value) : [];
 }
 
 function asStringRecord(value: unknown): Record<string, string> {
