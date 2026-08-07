@@ -41,4 +41,26 @@ if (missing.length > 0) {
   throw new Error(`npm package is missing required files: ${missing.join(', ')}`);
 }
 
-console.log(`package smoke passed: ${requiredFiles.length} required files present`);
+for (const value of ['100abc', '1e3', '100.5', 'Infinity']) {
+  try {
+    execFileSync(process.execPath, ['dist/cli.js', 'scan', '--no-defaults', '--timeout-ms', value, '--format', 'json'], {
+      cwd: new URL('..', import.meta.url),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    throw new Error(`packaged CLI accepted malformed --timeout-ms value: ${value}`);
+  } catch (error) {
+    if (error.status === undefined) throw error;
+    const stderr = error.stderr?.toString() ?? '';
+    if (!stderr.includes('--timeout-ms must be a finite base-10 integer >= 100')) {
+      throw new Error(`packaged CLI returned an unhelpful diagnostic for --timeout-ms ${value}: ${stderr}`);
+    }
+  }
+}
+
+execFileSync(process.execPath, ['dist/cli.js', 'scan', '--no-defaults', '--timeout-ms', '100', '--format', 'json'], {
+  cwd: new URL('..', import.meta.url),
+  stdio: ['ignore', 'ignore', 'inherit']
+});
+
+console.log(`package smoke passed: ${requiredFiles.length} required files present and CLI timeout validation works`);

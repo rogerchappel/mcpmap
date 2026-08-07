@@ -7,7 +7,7 @@ import type { CliOptions, OutputFormat } from './types.js';
 const VERSION = '0.1.0';
 
 function help(): string {
-  return `mcpmap - inventory local MCP configs without leaking secrets\n\nUsage:\n  mcpmap scan [--config path] [--format table|json|markdown] [--allow-run] [--timeout-ms 1500]\n  mcpmap doctor [--config path] [--format table|json|markdown] [--allow-run]\n\nOptions:\n  --config, -c       JSON/JSONC config to scan (repeatable)\n  --no-defaults      Only scan explicit --config files\n  --format, -f       Output format: table, json, markdown (default: table)\n  --allow-run        Probe startup by running server commands briefly (off by default)\n  --timeout-ms       Startup probe timeout (default: 1500)\n  --help, -h         Show help\n  --version, -v      Show version\n`;
+  return `mcpmap - inventory local MCP configs without leaking secrets\n\nUsage:\n  mcpmap scan [--config path] [--format table|json|markdown] [--allow-run] [--timeout-ms 1500]\n  mcpmap doctor [--config path] [--format table|json|markdown] [--allow-run]\n\nOptions:\n  --config, -c       JSON/JSONC config to scan (repeatable)\n  --no-defaults      Only scan explicit --config files\n  --format, -f       Output format: table, json, markdown (default: table)\n  --allow-run        Probe startup by running server commands briefly (off by default)\n  --timeout-ms       Startup probe timeout as an integer >= 100 (default: 1500)\n  --help, -h         Show help\n  --version, -v      Show version\n`;
 }
 
 export function parseArgs(argv: string[], env = process.env): CliOptions {
@@ -18,13 +18,12 @@ export function parseArgs(argv: string[], env = process.env): CliOptions {
     if (arg === '--config' || arg === '-c') options.configs.push(requireValue(argv, ++i, arg));
     else if (arg === '--format' || arg === '-f') options.format = parseFormat(requireValue(argv, ++i, arg));
     else if (arg === '--allow-run') options.allowRun = true;
-    else if (arg === '--timeout-ms') options.timeoutMs = Number.parseInt(requireValue(argv, ++i, arg), 10);
+    else if (arg === '--timeout-ms') options.timeoutMs = parseTimeoutMs(requireValue(argv, ++i, arg));
     else if (arg === '--no-defaults') options.includeDefaults = false;
     else if (arg === '--help' || arg === '-h') options.command = 'help';
     else if (arg === '--version' || arg === '-v') options.command = 'version';
     else throw new Error(`Unknown option: ${arg}`);
   }
-  if (!Number.isFinite(options.timeoutMs) || options.timeoutMs < 100) throw new Error('--timeout-ms must be a number >= 100');
   return options;
 }
 
@@ -37,6 +36,15 @@ function requireValue(argv: string[], index: number, flag: string): string {
 function parseFormat(value: string): OutputFormat {
   if (value === 'table' || value === 'json' || value === 'markdown') return value;
   throw new Error(`Unsupported format: ${value}`);
+}
+
+function parseTimeoutMs(value: string): number {
+  if (!/^\d+$/.test(value)) throw new Error('--timeout-ms must be a finite base-10 integer >= 100');
+  const timeoutMs = Number(value);
+  if (!Number.isFinite(timeoutMs) || !Number.isInteger(timeoutMs) || timeoutMs < 100) {
+    throw new Error('--timeout-ms must be a finite base-10 integer >= 100');
+  }
+  return timeoutMs;
 }
 
 export async function main(argv = process.argv.slice(2)): Promise<number> {
