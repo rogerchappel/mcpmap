@@ -13,6 +13,8 @@ MCP configs now live in several editor and agent app corners. Before you hand an
 
 `mcpmap` stays local. It does not upload inventories or run MCP servers unless you explicitly opt in with `--allow-run`.
 
+`--timeout-ms` accepts a finite base-10 integer number of milliseconds greater than or equal to `100` (default: `1500`). Decimal, exponent, non-finite, signed, and trailing-character forms are rejected.
+
 ## Install
 
 ```bash
