@@ -17,13 +17,17 @@ MCP configs now live in several editor and agent app corners. Before you hand an
 
 ## Install
 
+The first npm release has not been published yet. Until it is available, install
+and run `mcpmap` from a checkout:
+
 ```bash
-npm install -g mcpmap
-# or, from a checkout:
 npm install
 npm run build
 node dist/cli.js scan
 ```
+
+After the first registry release, `npm install -g mcpmap` will be the supported
+global installation command.
 
 ## Usage
 
@@ -98,9 +102,9 @@ documents needed for release review: `README.md`, `LICENSE`, `SECURITY.md`,
 Run `npm run package:smoke` or `npm pack --dry-run` before publishing to
 confirm those files are still present in the tarball.
 
-`npm run package:smoke` builds the package, verifies the compiled CLI bin is
-present, parses `npm pack --dry-run --json`, and fails if required runtime or
-support files are missing from the npm tarball.
+`npm run package:smoke` builds and packs the package, verifies the compiled CLI
+bin and required package files, installs the tarball into a disposable global
+prefix, runs `mcpmap --version`, and imports the declared library entrypoint.
 
 ## Contributing
 

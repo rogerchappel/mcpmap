@@ -21,10 +21,20 @@ npm run package:smoke
 The package smoke verifies:
 
 - the built `mcpmap` binary target exists
-- `npm pack --dry-run --json` completes successfully
+- `npm pack --json` produces a publishable tarball
 - the tarball includes compiled runtime files
 - the tarball includes the fake example config
 - the tarball includes README, license, security, changelog, contributing, and code of conduct documents
+- a disposable global install runs `mcpmap --version`
+- the installed package's declared library entrypoint imports successfully
+
+## Tagged Release
+
+The tag workflow runs `npm run release:check`, packs the validated package,
+publishes that tarball with npm trusted publishing and provenance, and attaches
+the same tarball to the GitHub release. Configure the npm package's trusted
+publisher for this repository and `.github/workflows/release.yml` before
+pushing the first release tag.
 
 ## Manual Review
 
