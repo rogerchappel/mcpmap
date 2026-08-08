@@ -32,6 +32,23 @@ try {
 
 requireValue(workflowFiles.some((file) => /^ci\.ya?ml$/.test(file)), 'CI workflow must be present');
 
+const releaseWorkflowUrl = new URL('.github/workflows/release.yml', root);
+if (existsSync(releaseWorkflowUrl)) {
+  const releaseWorkflow = await readFile(releaseWorkflowUrl, 'utf8');
+  const releaseCheckIndex = releaseWorkflow.indexOf('npm run release:check');
+  const packIndex = releaseWorkflow.indexOf('npm pack');
+  const publishIndex = releaseWorkflow.indexOf('npm publish');
+
+  requireValue(/id-token:\s*write/.test(releaseWorkflow), 'release workflow must grant id-token: write for npm trusted publishing');
+  requireValue(releaseCheckIndex >= 0, 'release workflow must run release:check');
+  requireValue(packIndex > releaseCheckIndex, 'release workflow must pack only after release:check passes');
+  requireValue(publishIndex > packIndex, 'release workflow must publish the packed artifact after validation');
+  requireValue(/npm publish[^\n]*--provenance/.test(releaseWorkflow), 'release workflow npm publish must enable provenance');
+  requireValue(/npm publish[^\n]*--access public/.test(releaseWorkflow), 'release workflow npm publish must use public access');
+} else {
+  errors.push('release workflow must be present');
+}
+
 if (errors.length > 0) {
   for (const error of errors) {
     console.error(`release readiness: ${error}`);
