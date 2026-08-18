@@ -36,11 +36,23 @@ const releaseWorkflowUrl = new URL('.github/workflows/release.yml', root);
 if (existsSync(releaseWorkflowUrl)) {
   const releaseWorkflow = await readFile(releaseWorkflowUrl, 'utf8');
   const releaseCheckIndex = releaseWorkflow.indexOf('npm run release:check');
+  const tagGuardIndex = releaseWorkflow.indexOf('Verify release tag matches package version');
   const packIndex = releaseWorkflow.indexOf('npm pack');
   const publishIndex = releaseWorkflow.indexOf('npm publish');
 
   requireValue(/id-token:\s*write/.test(releaseWorkflow), 'release workflow must grant id-token: write for npm trusted publishing');
   requireValue(releaseCheckIndex >= 0, 'release workflow must run release:check');
+  requireValue(tagGuardIndex >= 0, 'release workflow must verify the release tag matches package.json version');
+  requireValue(
+    /expected_tag="v\$\(node --print "require\('\.\/package\.json'\)\.version"\)"/.test(releaseWorkflow),
+    'release workflow must derive the expected tag from package.json version',
+  );
+  requireValue(
+    /GITHUB_REF_NAME[\s\S]*Release tag\/version mismatch[\s\S]*exit 1/.test(releaseWorkflow),
+    'release workflow tag guard must fail with an actionable mismatch diagnostic',
+  );
+  requireValue(tagGuardIndex < packIndex, 'release workflow must verify the release tag before packing');
+  requireValue(tagGuardIndex < publishIndex, 'release workflow must verify the release tag before publishing');
   requireValue(packIndex > releaseCheckIndex, 'release workflow must pack only after release:check passes');
   requireValue(publishIndex > packIndex, 'release workflow must publish the packed artifact after validation');
   requireValue(/npm publish[^\n]*--provenance/.test(releaseWorkflow), 'release workflow npm publish must enable provenance');
