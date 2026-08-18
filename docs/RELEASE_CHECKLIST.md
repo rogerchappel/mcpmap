@@ -30,11 +30,13 @@ The package smoke verifies:
 
 ## Tagged Release
 
-The tag workflow runs `npm run release:check`, packs the validated package,
-publishes that tarball with npm trusted publishing and provenance, and attaches
-the same tarball to the GitHub release. Configure the npm package's trusted
-publisher for this repository and `.github/workflows/release.yml` before
-pushing the first release tag.
+The tag must be exactly `v${package.json.version}` (for example, package version
+`0.1.0` requires tag `v0.1.0`). The workflow rejects a mismatched tag before
+packing or publishing. It then runs `npm run release:check`, packs the validated
+package, publishes that tarball with npm trusted publishing and provenance, and
+attaches the same tarball to the GitHub release. Configure the npm package's
+trusted publisher for this repository and `.github/workflows/release.yml`
+before pushing the first release tag.
 
 ## Manual Review
 

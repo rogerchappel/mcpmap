@@ -29,6 +29,14 @@ jobs:
         run: npm install --global npm@latest
       - name: Install dependencies
         run: npm ci
+      - name: Verify release tag matches package version
+        run: |
+          set -euo pipefail
+          expected_tag="v$(node --print "require('./package.json').version")"
+          if [[ "${GITHUB_REF_NAME}" != "${expected_tag}" ]]; then
+            echo "::error title=Release tag/version mismatch::Refusing to publish ${GITHUB_REF_NAME}; package.json requires ${expected_tag}. Update package.json or push the matching tag."
+            exit 1
+          fi
       - name: Install ReleaseBox
         run: |
           set -euo pipefail
