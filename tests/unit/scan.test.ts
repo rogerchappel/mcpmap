@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { renderScan } from '../../src/render.js';
 import { scan } from '../../src/scan.js';
+import { doctorRecord } from '../../src/doctor.js';
 import type { CliOptions } from '../../src/types.js';
 
 function options(configs: string[]): CliOptions {
@@ -55,4 +56,31 @@ test('reports disabled servers as informational doctor issues', async () => {
   assert.equal(result.servers[1]?.name, 'archived');
   assert.equal(result.servers[1]?.disabled, true);
   assert.ok(result.issues.some((issue) => issue.code === 'DISABLED_SERVER' && issue.severity === 'info'));
+});
+
+test('resolves relative commands from the configured absolute cwd without running them', async (t) => {
+  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-command-'));
+  t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
+  await fs.promises.writeFile(path.join(directory, 'start.sh'), '#!/bin/sh\nexit 99\n');
+  const record = {
+    name: 'local', sourcePath: 'config.json', sourceLabel: 'config.json', command: './start.sh', args: [], cwd: directory,
+    env: {}, envKeys: [], tools: [], disabled: false, rawShape: 'mcpServers', issues: []
+  };
+
+  assert.equal(doctorRecord(record).some((issue) => issue.code === 'COMMAND_NOT_FOUND'), false);
+  assert.equal(doctorRecord({ ...record, command: './missing.sh' }).some((issue) => issue.code === 'COMMAND_NOT_FOUND'), true);
+});
+
+test('resolves relative commands using a relative cwd from the process directory', async (t) => {
+  const directory = await fs.promises.mkdtemp(path.join(process.cwd(), '.mcpmap-command-'));
+  t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
+  await fs.promises.writeFile(path.join(directory, 'start.sh'), '#!/bin/sh\nexit 99\n');
+  const record = {
+    name: 'local', sourcePath: 'config.json', sourceLabel: 'config.json', command: './start.sh', args: [], cwd: path.relative(process.cwd(), directory),
+    env: {}, envKeys: [], tools: [], disabled: false, rawShape: 'mcpServers', issues: []
+  };
+
+  const issues = doctorRecord(record);
+  assert.equal(issues.some((issue) => issue.code === 'COMMAND_NOT_FOUND'), false);
+  assert.equal(issues.some((issue) => issue.code === 'RELATIVE_CWD'), true);
 });
