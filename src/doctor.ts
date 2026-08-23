@@ -25,7 +25,7 @@ export function doctorRecord(record: ServerRecord): DoctorIssue[] {
   }
   if (!record.command) {
     issues.push({ code: 'MISSING_COMMAND', severity: 'error', message: 'Server has no command.', server: record.name, sourcePath: record.sourcePath });
-  } else if (!commandExists(record.command)) {
+  } else if (!commandExists(record.command, record.cwd)) {
     issues.push({ code: 'COMMAND_NOT_FOUND', severity: 'warn', message: `Command '${record.command}' was not found on PATH or as a file.`, server: record.name, sourcePath: record.sourcePath });
   }
   if (record.cwd && !path.isAbsolute(record.cwd)) {
@@ -41,8 +41,11 @@ export function doctorRecord(record: ServerRecord): DoctorIssue[] {
   return issues;
 }
 
-function commandExists(command: string): boolean {
-  if (command.includes('/') || command.includes('\\')) return fs.existsSync(command);
+function commandExists(command: string, cwd?: string): boolean {
+  if (command.includes('/') || command.includes('\\')) {
+    const effectiveCwd = cwd ? path.resolve(cwd) : process.cwd();
+    return fs.existsSync(path.resolve(effectiveCwd, command));
+  }
   const paths = (process.env.PATH ?? '').split(path.delimiter);
   const extensions = process.platform === 'win32' ? ['.exe', '.cmd', '.bat', ''] : [''];
   return paths.some((dir) => extensions.some((ext) => fs.existsSync(path.join(dir, `${command}${ext}`))));
