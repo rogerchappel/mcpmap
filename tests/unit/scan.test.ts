@@ -18,6 +18,23 @@ test('scans Claude Desktop style configs and redacts secrets', async () => {
   assert.equal(result.servers[0]?.env.API_TOKEN, '<redacted>');
 });
 
+test('rejects a missing explicit config with its resolved path', async () => {
+  const missing = path.join(os.tmpdir(), 'mcpmap-missing-explicit.json');
+  await assert.rejects(scan(options([missing])), {
+    message: `Explicit config file not found: ${missing}`
+  });
+});
+
+test('silently skips missing default discovery paths', async (t) => {
+  const home = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-empty-home-'));
+  t.after(() => fs.promises.rm(home, { recursive: true, force: true }));
+  const result = await scan({ ...options([]), home, includeDefaults: true });
+
+  assert.equal(result.servers.length, 0);
+  assert.equal(result.sources.length > 0, true);
+  assert.equal(result.sources.every((source) => !source.explicit && !source.exists), true);
+});
+
 test('redacts secret-bearing arguments in every scan output format', async (t) => {
   const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-args-'));
   t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
