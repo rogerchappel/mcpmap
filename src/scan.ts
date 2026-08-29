@@ -52,8 +52,17 @@ export async function scan(options: CliOptions): Promise<ScanResult> {
   const issues: DoctorIssue[] = [];
   for (const source of sources) {
     source.exists = await pathExists(source.path);
-    if (!source.exists) continue;
-    const text = await fs.promises.readFile(source.path, 'utf8');
+    if (!source.exists) {
+      if (source.explicit) throw new Error(`Explicit config file not found: ${source.path}`);
+      continue;
+    }
+    let text: string;
+    try {
+      text = await fs.promises.readFile(source.path, 'utf8');
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(`Unable to read config file ${source.path}: ${detail}`, { cause: error });
+    }
     const parsed = parseJsonc(text, source.path);
     const extracted = extractServerConfigs(parsed, source.path);
     issues.push(...extracted.issues);
