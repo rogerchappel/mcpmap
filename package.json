@@ -26,7 +26,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build:test && node --test dist-test/tests/**/*.test.js",
     "pretest": "npm run build",
-    "smoke": "npm run build && node dist/cli.js --help && sh tests/cli-smoke.sh",
+    "smoke": "npm run build && node dist/cli.js --help && bash tests/cli-smoke.sh",
     "package:smoke": "npm run build && node scripts/package-smoke.mjs",
     "release:readiness": "node scripts/validate-release-readiness.mjs",
     "release:check": "npm run release:readiness && npm test && npm run check && npm run build && npm run smoke && npm run package:smoke",
