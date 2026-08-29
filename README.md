@@ -47,7 +47,7 @@ mcpmap doctor --allow-run --timeout-ms 1000
 
 ### Config discovery
 
-By default, `mcpmap` checks common local MCP locations for Claude Desktop, VS Code, Cursor, Windsurf, and `.mcp.json`. Add `--config` / `-c` for explicit JSON or JSONC files. Use `--no-defaults` when you only want those explicit files.
+By default, `mcpmap` checks common local MCP locations for Claude Desktop, VS Code, Cursor, Windsurf, and `.mcp.json`; default locations that do not exist are silently skipped. Add `--config` / `-c` for explicit JSON or JSONC files. An explicit path must exist and be readable, otherwise the command exits non-zero with that path in the diagnostic. Use `--no-defaults` when you only want those explicit files.
 
 ### Safety model
 

@@ -7,7 +7,7 @@ import type { CliOptions, OutputFormat } from './types.js';
 const VERSION = '0.1.0';
 
 function help(): string {
-  return `mcpmap - inventory local MCP configs without leaking secrets\n\nUsage:\n  mcpmap scan [--config path] [--format table|json|markdown] [--allow-run] [--timeout-ms 1500]\n  mcpmap doctor [--config path] [--format table|json|markdown] [--allow-run]\n\nOptions:\n  --config, -c       JSON/JSONC config to scan (repeatable)\n  --no-defaults      Only scan explicit --config files\n  --format, -f       Output format: table, json, markdown (default: table)\n  --allow-run        Probe startup by running server commands briefly (off by default)\n  --timeout-ms       Startup probe timeout as an integer >= 100 (default: 1500)\n  --help, -h         Show help\n  --version, -v      Show version\n`;
+  return `mcpmap - inventory local MCP configs without leaking secrets\n\nUsage:\n  mcpmap scan [--config path] [--format table|json|markdown] [--allow-run] [--timeout-ms 1500]\n  mcpmap doctor [--config path] [--format table|json|markdown] [--allow-run]\n\nOptions:\n  --config, -c       JSON/JSONC config; missing/unreadable paths fail (repeatable)\n  --no-defaults      Only scan explicit --config files\n  --format, -f       Output format: table, json, markdown (default: table)\n  --allow-run        Probe startup by running server commands briefly (off by default)\n  --timeout-ms       Startup probe timeout as an integer >= 100 (default: 1500)\n  --help, -h         Show help\n  --version, -v      Show version\n`;
 }
 
 export function parseArgs(argv: string[], env = process.env): CliOptions {
