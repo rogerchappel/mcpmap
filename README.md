@@ -60,7 +60,7 @@ Redaction covers sensitive env key names (`TOKEN`, `PASSWORD`, `SECRET`, `API_KE
 `mcpmap doctor` currently flags:
 
 - missing commands;
-- bare commands not found on `PATH`, or slash-containing commands not found relative to the configured `cwd` (using the process directory when `cwd` is omitted or relative);
+- bare commands without a runnable file on `PATH`, or slash-containing commands without a runnable regular file relative to the configured `cwd` (using the process directory when `cwd` is omitted or relative; POSIX execute bits and Windows `PATHEXT` are respected);
 - relative `cwd` values;
 - duplicate server names across scanned configs;
 - disabled server entries;
