@@ -79,6 +79,7 @@ test('resolves relative commands from the configured absolute cwd without runnin
   const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-command-'));
   t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
   await fs.promises.writeFile(path.join(directory, 'start.sh'), '#!/bin/sh\nexit 99\n');
+  await fs.promises.chmod(path.join(directory, 'start.sh'), 0o755);
   const record = {
     name: 'local', sourcePath: 'config.json', sourceLabel: 'config.json', command: './start.sh', args: [], cwd: directory,
     env: {}, envKeys: [], tools: [], disabled: false, rawShape: 'mcpServers', issues: []
@@ -92,6 +93,7 @@ test('resolves relative commands using a relative cwd from the process directory
   const directory = await fs.promises.mkdtemp(path.join(process.cwd(), '.mcpmap-command-'));
   t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
   await fs.promises.writeFile(path.join(directory, 'start.sh'), '#!/bin/sh\nexit 99\n');
+  await fs.promises.chmod(path.join(directory, 'start.sh'), 0o755);
   const record = {
     name: 'local', sourcePath: 'config.json', sourceLabel: 'config.json', command: './start.sh', args: [], cwd: path.relative(process.cwd(), directory),
     env: {}, envKeys: [], tools: [], disabled: false, rawShape: 'mcpServers', issues: []
@@ -100,4 +102,20 @@ test('resolves relative commands using a relative cwd from the process directory
   const issues = doctorRecord(record);
   assert.equal(issues.some((issue) => issue.code === 'COMMAND_NOT_FOUND'), false);
   assert.equal(issues.some((issue) => issue.code === 'RELATIVE_CWD'), true);
+});
+
+test('rejects directories and non-executable command files on POSIX', { skip: process.platform === 'win32' }, async (t) => {
+  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-unrunnable-'));
+  t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
+  const nonExecutable = path.join(directory, 'server.sh');
+  await fs.promises.writeFile(nonExecutable, '#!/bin/sh\n');
+  await fs.promises.chmod(nonExecutable, 0o644);
+  const record = {
+    name: 'local', sourcePath: 'config.json', sourceLabel: 'config.json', command: nonExecutable, args: [],
+    env: {}, envKeys: [], tools: [], disabled: false, rawShape: 'mcpServers', issues: []
+  };
+
+  for (const command of [nonExecutable, directory]) {
+    assert.equal(doctorRecord({ ...record, command }).some((issue) => issue.code === 'COMMAND_NOT_FOUND'), true);
+  }
 });
