@@ -44,9 +44,21 @@ export function doctorRecord(record: ServerRecord): DoctorIssue[] {
 function commandExists(command: string, cwd?: string): boolean {
   if (command.includes('/') || command.includes('\\')) {
     const effectiveCwd = cwd ? path.resolve(cwd) : process.cwd();
-    return fs.existsSync(path.resolve(effectiveCwd, command));
+    return isRunnableFile(path.resolve(effectiveCwd, command));
   }
   const paths = (process.env.PATH ?? '').split(path.delimiter);
-  const extensions = process.platform === 'win32' ? ['.exe', '.cmd', '.bat', ''] : [''];
-  return paths.some((dir) => extensions.some((ext) => fs.existsSync(path.join(dir, `${command}${ext}`))));
+  const extensions = process.platform === 'win32'
+    ? (process.env.PATHEXT ?? '.COM;.EXE;.BAT;.CMD').split(';').filter(Boolean)
+    : [''];
+  return paths.some((dir) => extensions.some((ext) => isRunnableFile(path.join(dir, `${command}${ext}`))));
+}
+
+function isRunnableFile(candidate: string): boolean {
+  try {
+    if (!fs.statSync(candidate).isFile()) return false;
+    if (process.platform !== 'win32') fs.accessSync(candidate, fs.constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
