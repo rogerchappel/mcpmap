@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import os from 'node:os';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { scan } from './scan.js';
 import { renderDoctor, renderScan } from './render.js';
 import type { CliOptions, OutputFormat } from './types.js';
@@ -61,6 +63,15 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+function isDirectEntry(): boolean {
+  if (!process.argv[1]) return false;
+  try {
+    return fs.realpathSync(fileURLToPath(import.meta.url)) === fs.realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isDirectEntry()) {
   main().then((code) => { process.exitCode = code; });
 }
