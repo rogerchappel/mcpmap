@@ -55,6 +55,37 @@ test('redacts secret-bearing arguments in every scan output format', async (t) =
   }
 });
 
+test('uses original secrets only for an opt-in startup probe', async (t) => {
+  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-probe-secrets-'));
+  t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
+  const configPath = path.join(directory, 'config.json');
+  const envSecret = 'sk-environment-secret-1234567890';
+  const argumentSecret = 'ghp_123456789012345678901234567890';
+  const script = 'process.exit(process.env.API_TOKEN === process.argv[1] && process.argv[2] === "expected" ? 0 : 23)';
+  await fs.promises.writeFile(configPath, JSON.stringify({
+    mcpServers: {
+      controlled: {
+        command: process.execPath,
+        args: ['-e', script, envSecret, 'expected', '--token', argumentSecret],
+        env: { API_TOKEN: envSecret }
+      }
+    }
+  }));
+
+  const result = await scan({ ...options([configPath]), allowRun: true, timeoutMs: 500 });
+  assert.equal(result.servers[0]?.probe?.status, 'started');
+  assert.deepEqual(result.servers[0]?.env, { API_TOKEN: '<redacted>' });
+  assert.deepEqual(result.servers[0]?.args, ['-e', script, '<redacted>', 'expected', '--token', '<redacted>']);
+
+  for (const format of ['json', 'table', 'markdown'] as const) {
+    const output = renderScan(result, format);
+    assert.equal(output.includes(envSecret), false, `${format} output leaked the environment secret`);
+    assert.equal(output.includes(argumentSecret), false, `${format} output leaked the argument secret`);
+  }
+  assert.equal(result.servers[0]?.probe?.message.includes(envSecret), false);
+  assert.equal(result.servers[0]?.probe?.message.includes(argumentSecret), false);
+});
+
 test('scans VS Code style configs and reports relative cwd', async () => {
   const result = await scan(options([path.join('tests', 'fixtures', 'vscode-mcp.json')]));
   assert.equal(result.servers[0]?.name, 'sqlite');
