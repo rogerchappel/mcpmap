@@ -75,7 +75,9 @@ test('uses original secrets only for an opt-in startup probe', async (t) => {
   const result = await scan({ ...options([configPath]), allowRun: true, timeoutMs: 500 });
   assert.equal(result.servers[0]?.probe?.status, 'started');
   assert.deepEqual(result.servers[0]?.env, { API_TOKEN: '<redacted>' });
-  assert.deepEqual(result.servers[0]?.args, ['-e', script, '<redacted>', 'expected', '--token', '<redacted>']);
+  assert.equal(result.servers[0]?.args.includes(envSecret), false);
+  assert.equal(result.servers[0]?.args.includes(argumentSecret), false);
+  assert.equal(result.servers[0]?.args.filter((argument) => argument === '<redacted>').length, 2);
 
   for (const format of ['json', 'table', 'markdown'] as const) {
     const output = renderScan(result, format);

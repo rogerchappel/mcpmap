@@ -1,8 +1,9 @@
 import { spawn } from 'node:child_process';
 import { performance } from 'node:perf_hooks';
-import type { ProbeResult, ServerRecord } from './types.js';
+import { redactInline } from './redact.js';
+import type { ProbeConfig, ProbeResult } from './types.js';
 
-export function probeServer(server: ServerRecord, timeoutMs: number): Promise<ProbeResult> {
+export function probeServer(server: ProbeConfig, timeoutMs: number): Promise<ProbeResult> {
   const started = performance.now();
   if (!server.command) return Promise.resolve({ status: 'skipped', message: 'No command to probe.', elapsedMs: 0 });
   return new Promise((resolve) => {
@@ -21,7 +22,7 @@ export function probeServer(server: ServerRecord, timeoutMs: number): Promise<Pr
       resolve({ ...result, elapsedMs: Math.round(performance.now() - started) });
     };
     const timer = setTimeout(() => finish({ status: 'started', message: `Process survived ${timeoutMs}ms startup window.` }), timeoutMs);
-    child.once('error', (error) => finish({ status: 'error', message: error.message }));
+    child.once('error', (error) => finish({ status: 'error', message: redactInline(error.message) }));
     child.once('exit', (code, signal) => finish({ status: code === 0 ? 'started' : 'error', message: `Process exited during probe (code=${code ?? 'null'}, signal=${signal ?? 'null'}).` }));
   });
 }
