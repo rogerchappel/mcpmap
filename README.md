@@ -51,7 +51,7 @@ By default, `mcpmap` checks common local MCP locations for Claude Desktop, VS Co
 
 ### Safety model
 
-Default mode is static-only: read config files, parse them, redact secrets, and report doctor findings. `--allow-run` briefly starts each configured command to see if it survives a short startup window. That can execute arbitrary local commands from your config, so leave it off unless you trust the files being scanned.
+Default mode is static-only: read config files, parse them, redact secrets, and report doctor findings. `--allow-run` briefly starts each configured command to see if it survives a short startup window. The opt-in probe receives the command's original arguments and environment so it can start normally, while inventory records, rendered output, and probe diagnostics remain redacted. That can execute arbitrary local commands from your config, so leave it off unless you trust the files being scanned.
 
 Redaction covers sensitive env key names (`TOKEN`, `PASSWORD`, `SECRET`, `API_KEY`, etc.), common token-looking values, long opaque strings, and selected inline patterns. Treat output as safer, not magically declassified.
 
