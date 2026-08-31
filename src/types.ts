@@ -44,6 +44,13 @@ export interface ServerRecord {
   probe?: ProbeResult;
 }
 
+export interface ProbeConfig {
+  command?: string;
+  args: string[];
+  cwd?: string;
+  env: Record<string, string>;
+}
+
 export type IssueSeverity = 'info' | 'warn' | 'error';
 
 export interface DoctorIssue {

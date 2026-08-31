@@ -5,7 +5,7 @@ import { extractServerConfigs, pathExists } from './discover.js';
 import { redactArguments, redactObject } from './redact.js';
 import { doctorRecords } from './doctor.js';
 import { probeServer } from './probe.js';
-import type { CliOptions, DoctorIssue, RawServerConfig, ScanResult, ServerRecord } from './types.js';
+import type { CliOptions, DoctorIssue, ProbeConfig, RawServerConfig, ScanResult, ServerRecord } from './types.js';
 
 function asString(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
@@ -18,6 +18,15 @@ function asStringArray(value: unknown): string[] {
 function asStringRecord(value: unknown): Record<string, string> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   return redactObject(value as Record<string, unknown>);
+}
+
+function asRawStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.map(String) : [];
+}
+
+function asRawStringRecord(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, String(item)]));
 }
 
 function extractTools(value: unknown): string[] {
@@ -50,6 +59,7 @@ export async function scan(options: CliOptions): Promise<ScanResult> {
   const sources = buildSources(options.configs, options);
   const servers: ServerRecord[] = [];
   const issues: DoctorIssue[] = [];
+  const probeConfigs = new Map<ServerRecord, ProbeConfig>();
   for (const source of sources) {
     source.exists = await pathExists(source.path);
     if (!source.exists) {
@@ -67,14 +77,24 @@ export async function scan(options: CliOptions): Promise<ScanResult> {
     const extracted = extractServerConfigs(parsed, source.path);
     issues.push(...extracted.issues);
     for (const [name, raw] of Object.entries(extracted.servers)) {
-      servers.push(normalizeServer(name, raw, source.path, source.label, extracted.shape));
+      const server = normalizeServer(name, raw, source.path, source.label, extracted.shape);
+      servers.push(server);
+      if (options.allowRun) {
+        probeConfigs.set(server, {
+          command: asString(raw.command),
+          args: asRawStringArray(raw.args),
+          cwd: asString(raw.cwd),
+          env: asRawStringRecord(raw.env)
+        });
+      }
     }
   }
   const doctorIssues = doctorRecords(servers);
   issues.push(...doctorIssues);
   for (const server of servers) {
     server.issues = issues.filter((issue) => issue.server === server.name && issue.sourcePath === server.sourcePath);
-    if (options.allowRun) server.probe = await probeServer(server, options.timeoutMs);
+    const probeConfig = probeConfigs.get(server);
+    if (probeConfig) server.probe = await probeServer(probeConfig, options.timeoutMs);
   }
   return { generatedAt: new Date().toISOString(), sources, servers, issues };
 }
