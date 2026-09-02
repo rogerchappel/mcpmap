@@ -31,8 +31,12 @@ export function parseArgs(argv: string[], env = process.env): CliOptions {
 
 function requireValue(argv: string[], index: number, flag: string): string {
   const value = argv[index];
-  if (!value) throw new Error(`${flag} requires a value`);
+  if (!value || isRecognizedOption(value)) throw new Error(`${flag} requires a value`);
   return value;
+}
+
+function isRecognizedOption(value: string): boolean {
+  return ['--config', '-c', '--format', '-f', '--allow-run', '--timeout-ms', '--no-defaults', '--help', '-h', '--version', '-v'].includes(value);
 }
 
 function parseFormat(value: string): OutputFormat {
