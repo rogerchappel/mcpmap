@@ -14,3 +14,13 @@ if node dist/cli.js scan --no-defaults --config "$missing_config" 2>missing-conf
 fi
 grep "Explicit config file not found: $missing_config" missing-config.err
 rm -f missing-config.err
+
+for case in '--config --no-defaults' '-c --format' '--format --allow-run' '-f --timeout-ms' '--timeout-ms --help'; do
+  read -r flag next_option <<< "$case"
+  if node dist/cli.js scan "$flag" "$next_option" 2>missing-value.err; then
+    echo "expected $flag without a value to fail" >&2
+    exit 1
+  fi
+  grep -- "$flag requires a value" missing-value.err
+done
+rm -f missing-value.err
