@@ -79,7 +79,7 @@ export async function scan(options: CliOptions): Promise<ScanResult> {
     for (const [name, raw] of Object.entries(extracted.servers)) {
       const server = normalizeServer(name, raw, source.path, source.label, extracted.shape);
       servers.push(server);
-      if (options.allowRun) {
+      if (options.allowRun && !server.disabled) {
         probeConfigs.set(server, {
           command: asString(raw.command),
           args: asRawStringArray(raw.args),
