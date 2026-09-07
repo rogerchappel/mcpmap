@@ -108,6 +108,30 @@ test('reports disabled servers as informational doctor issues', async () => {
   assert.ok(result.issues.some((issue) => issue.code === 'DISABLED_SERVER' && issue.severity === 'info'));
 });
 
+test('does not probe disabled servers while probing enabled servers', async (t) => {
+  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-disabled-probe-'));
+  t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
+  const disabledMarker = path.join(directory, 'disabled-marker');
+  const enabledMarker = path.join(directory, 'enabled-marker');
+  const configPath = path.join(directory, 'config.json');
+  const writeMarker = 'require("node:fs").writeFileSync(process.argv[1], "started")';
+  await fs.promises.writeFile(configPath, JSON.stringify({
+    mcpServers: {
+      disabled: { command: process.execPath, args: ['-e', writeMarker, disabledMarker], disabled: true },
+      enabled: { command: process.execPath, args: ['-e', writeMarker, enabledMarker] }
+    }
+  }));
+
+  const result = await scan({ ...options([configPath]), allowRun: true, timeoutMs: 500 });
+
+  assert.equal(result.servers[0]?.disabled, true);
+  assert.equal(result.servers[0]?.probe, undefined);
+  await assert.rejects(fs.promises.access(disabledMarker), { code: 'ENOENT' });
+  assert.equal(result.servers[1]?.probe?.status, 'started');
+  await fs.promises.access(enabledMarker);
+  assert.ok(result.issues.some((issue) => issue.code === 'DISABLED_SERVER' && issue.server === 'disabled'));
+});
+
 test('resolves relative commands from the configured absolute cwd without running them', async (t) => {
   const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-command-'));
   t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
