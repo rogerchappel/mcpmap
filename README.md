@@ -67,6 +67,10 @@ Redaction covers sensitive env key names (`TOKEN`, `PASSWORD`, `SECRET`, `API_KE
 - risky env keys or token-looking env values;
 - unknown config shapes.
 
+Disabled server records remain visible as informational findings, but doctor
+does not apply command or `cwd` startup-readiness checks to them. Passive
+redaction and sensitive-environment findings still apply.
+
 ## Examples
 
 ```bash
