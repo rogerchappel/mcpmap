@@ -108,6 +108,18 @@ test('reports disabled servers as informational doctor issues', async () => {
   assert.ok(result.issues.some((issue) => issue.code === 'DISABLED_SERVER' && issue.severity === 'info'));
 });
 
+test('skips startup-readiness findings for disabled servers', () => {
+  const record = {
+    name: 'archived', sourcePath: 'config.json', sourceLabel: 'config.json', args: [], cwd: 'relative',
+    env: { API_TOKEN: '<redacted>' }, envKeys: ['API_TOKEN'], tools: [], disabled: true, rawShape: 'mcpServers', issues: []
+  };
+
+  for (const command of [undefined, 'definitely-not-installed']) {
+    const issues = doctorRecord({ ...record, command });
+    assert.deepEqual(issues.map((issue) => issue.code), ['DISABLED_SERVER', 'RISKY_ENV_KEY']);
+  }
+});
+
 test('does not probe disabled servers while probing enabled servers', async (t) => {
   const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mcpmap-disabled-probe-'));
   t.after(() => fs.promises.rm(directory, { recursive: true, force: true }));
