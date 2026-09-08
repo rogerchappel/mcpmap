@@ -22,13 +22,12 @@ export function doctorRecord(record: ServerRecord): DoctorIssue[] {
   const issues: DoctorIssue[] = [];
   if (record.disabled) {
     issues.push({ code: 'DISABLED_SERVER', severity: 'info', message: 'Server is marked disabled in config.', server: record.name, sourcePath: record.sourcePath });
-  }
-  if (!record.command) {
+  } else if (!record.command) {
     issues.push({ code: 'MISSING_COMMAND', severity: 'error', message: 'Server has no command.', server: record.name, sourcePath: record.sourcePath });
   } else if (!commandExists(record.command, record.cwd)) {
     issues.push({ code: 'COMMAND_NOT_FOUND', severity: 'warn', message: `Command '${record.command}' was not found on PATH or as a file.`, server: record.name, sourcePath: record.sourcePath });
   }
-  if (record.cwd && !path.isAbsolute(record.cwd)) {
+  if (!record.disabled && record.cwd && !path.isAbsolute(record.cwd)) {
     issues.push({ code: 'RELATIVE_CWD', severity: 'warn', message: `cwd '${record.cwd}' is relative; startup depends on the client working directory.`, server: record.name, sourcePath: record.sourcePath });
   }
   for (const [key, value] of Object.entries(record.env)) {
